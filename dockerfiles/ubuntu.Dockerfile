@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ubuntu:22.04
+ARG BASE_IMAGE=ubuntu:24.04
 FROM ${BASE_IMAGE}
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -6,22 +6,19 @@ ARG DEBIAN_FRONTEND=noninteractive
 COPY requirements/apt.txt /tmp/apt.txt
 COPY requirements/pip.txt /tmp/pip.txt
 
-RUN apt-get update \
-    && xargs -a /tmp/apt.txt apt-get install -y --no-install-recommends \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
-    && apt-get clean
+# System dependencies
+RUN apt-get update && \
+    xargs -a /tmp/apt.txt apt-get install -y --no-install-recommends && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man
 
-RUN sed -i 's/^\($ModLoad imklog\)/#\1/' /etc/rsyslog.conf
+# Create and activate virtual environment
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Set system python to Externally managed
-RUN rm -f /usr/lib/python3.11/EXTERNALLY-MANAGED
-
-# Upgrade pip to latest version and install packages
-RUN python3 -m pip install --upgrade pip setuptools wheel && \
-    pip3 install --no-cache-dir --break-system-packages --index-url https://pypi.org/simple -r /tmp/pip.txt
-
+# Install pip packages into venv
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r /tmp/pip.txt
 
 COPY initctl_faker /usr/local/bin/initctl_faker
 RUN chmod +x /usr/local/bin/initctl_faker && \
