@@ -78,17 +78,17 @@ for tag in "${!builds[@]}"; do
   echo "✅ Image built: bsmeding/ansible_cicd_${tag}:latest"
 
   # 📝 Update Docker Hub README from README.md
-  if [[ -f README.md ]]; then
-    echo "📤 Updating Docker Hub description for bsmeding/ansible_cicd_${tag}"
-    docker run --rm -v "$(pwd)":/data \
-      -e DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:-}" \
-      -e DOCKERHUB_TOKEN="${DOCKERHUB_TOKEN:-}" \
-      peter-evans/dockerhub-description:latest \
-      --username "${DOCKERHUB_USERNAME}" \
-      --password "${DOCKERHUB_TOKEN}" \
-      --repository "bsmeding/ansible_cicd_${tag}" \
-      --readme-file /data/README.md
-  fi
+  # if [[ -f README.md ]]; then
+  #   echo "📤 Updating Docker Hub description for bsmeding/ansible_cicd_${tag}"
+  #   docker run --rm -v "$(pwd)":/data \
+  #     -e DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:-}" \
+  #     -e DOCKERHUB_TOKEN="${DOCKERHUB_TOKEN:-}" \
+  #     peter-evans/dockerhub-description:latest \
+  #     --username "${DOCKERHUB_USERNAME}" \
+  #     --password "${DOCKERHUB_TOKEN}" \
+  #     --repository "bsmeding/ansible_cicd_${tag}" \
+  #     --readme-file /data/README.md
+  # fi
 done
 
 echo -e "\n🎉 All builds completed!"
