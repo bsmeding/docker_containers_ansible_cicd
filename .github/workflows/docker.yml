@@ -36,12 +36,16 @@ jobs:
         repo:
           - ansible_cicd_ubuntu2004
           - ansible_cicd_ubuntu2204
+          - ansible_cicd_ubuntu
           - ansible_cicd_debian11
           - ansible_cicd_debian12
+          - ansible_cicd_debian
           - ansible_cicd_rockylinux8
           - ansible_cicd_rockylinux9
+          - ansible_cicd_rockylinux
           - ansible_cicd_alpine3.20
           - ansible_cicd_alpine3.21
+          - ansible_cicd_alpine3
 
     steps:
       - name: Checkout repository
