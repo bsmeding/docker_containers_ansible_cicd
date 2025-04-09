@@ -1,0 +1,17 @@
+
+rpm
+dnf-plugins-core
+libyaml-devel
+initscripts
+sudo
+which
+hostname
+libyaml-devel
+python3
+python3-pip
+python3-pyyaml
+git
+iproute
+sshpass
+docker
+python3-docker
