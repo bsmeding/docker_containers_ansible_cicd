@@ -6,12 +6,17 @@ set -euo pipefail
 declare -A builds=(
   [ubuntu2004]="ubuntu.Dockerfile ubuntu:20.04"
   [ubuntu2204]="ubuntu.Dockerfile ubuntu:22.04"
+  [ubuntu2404]="ubuntu.Dockerfile ubuntu:24.04"
+  [ubuntu]="ubuntu.Dockerfile ubuntu:24.04"
   [debian11]="debian.Dockerfile debian:bullseye"
   [debian12]="debian.Dockerfile debian:bookworm"
+  [debian]="debian.Dockerfile debian:bookworm"
   [rockylinux8]="rocky.Dockerfile rockylinux:8"
   [rockylinux9]="rocky.Dockerfile rockylinux:9"
+  [rockylinux]="rocky.Dockerfile rockylinux:9"
   [alpine3.20]="alpine.Dockerfile alpine:3.20"
   [alpine3.21]="alpine.Dockerfile alpine:3.21"
+  [alpine3]="alpine.Dockerfile alpine:3.21"
 )
 
 # Get correct Ansible version per distro version
@@ -73,6 +78,19 @@ for tag in "${!builds[@]}"; do
     -t bsmeding/ansible_cicd_${tag}:latest .
 
   echo "✅ Image built: bsmeding/ansible_cicd_${tag}:latest"
+
+  # 📝 Update Docker Hub README from README.md
+  if [[ -f README.md ]]; then
+    echo "📤 Updating Docker Hub description for bsmeding/ansible_cicd_${tag}"
+    docker run --rm -v "$(pwd)":/data \
+      -e DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:-}" \
+      -e DOCKERHUB_TOKEN="${DOCKERHUB_TOKEN:-}" \
+      peter-evans/dockerhub-description:latest \
+      --username "${DOCKERHUB_USERNAME}" \
+      --password "${DOCKERHUB_TOKEN}" \
+      --repository "bsmeding/ansible_cicd_${tag}" \
+      --readme-file /data/README.md
+  fi
 done
 
 echo -e "\n🎉 All builds completed!"
