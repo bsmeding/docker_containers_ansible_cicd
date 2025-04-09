@@ -25,10 +25,8 @@ get_ansible_version() {
     echo "ansible==4.10.0"
   elif [[ "$1" == "ubuntu2004" ]]; then
     echo "ansible==6.7.0"
-  elif [[ "$1" == "debian11" || "$1" == "rockylinux9" ||  "$1" == "alpine3.17" ]]; then
-    echo "ansible==8.7.0"
   else
-    echo "ansible==9.5.1"
+    echo "ansible==8.7.0"
   fi
 }
 
