@@ -5,55 +5,53 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-
 jobs:
-    docker-matrix:
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout repository
-            uses: actions/checkout@v4
+  docker-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-        - name: Set up Docker Buildx
-            uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-        - name: Log in to Docker Hub
-            uses: docker/login-action@v3
-            with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-        - name: Run custom build script and push
-            run: |
-            chmod +x build.sh
-            ./build.sh --push
-            env:
-            DOCKER_BUILDKIT: 1
+      - name: Run custom build script and push
+        run: |
+          chmod +x build.sh
+          ./build.sh --push
+        env:
+          DOCKER_BUILDKIT: 1
 
-    update-readme:
-        needs: docker-matrix
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-            repo:
-                - ansible_cicd_ubuntu2004
-                - ansible_cicd_ubuntu2204
-                - ansible_cicd_debian11
-                - ansible_cicd_debian12
-                - ansible_cicd_rockylinux8
-                - ansible_cicd_rockylinux9
-                - ansible_cicd_alpine3.20
-                - ansible_cicd_alpine3.21
+  update-readme:
+    needs: docker-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo:
+          - ansible_cicd_ubuntu2004
+          - ansible_cicd_ubuntu2204
+          - ansible_cicd_debian11
+          - ansible_cicd_debian12
+          - ansible_cicd_rockylinux8
+          - ansible_cicd_rockylinux9
+          - ansible_cicd_alpine3.20
+          - ansible_cicd_alpine3.21
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
- 
-            - name: Update Docker Hub README for ${{ matrix.repo }}
-              uses: peter-evans/dockerhub-description@v3
-              with:
-                username: ${{ secrets.DOCKERHUB_USERNAME }}
-                password: ${{ secrets.DOCKERHUB_TOKEN }}
-                repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.repo }}
-                readme-filepath: ./README.md
-                short-description: "Ansible CI/CD container for ${{ matrix.repo }}"
-        
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update Docker Hub README for ${{ matrix.repo }}
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.repo }}
+          readme-filepath: ./README.md
+          short-description: "Ansible CI/CD container for ${{ matrix.repo }}"
