@@ -20,13 +20,16 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r /tmp/pip.txt
 
-COPY initctl_faker /usr/local/bin/initctl_faker
-RUN chmod +x /usr/local/bin/initctl_faker && \
-    ls -l /sbin/initctl && \
-    rm -f /sbin/initctl && \
-    ln -s /usr/local/bin/initctl_faker /sbin/initctl && \
-    echo "Linked /sbin/initctl -> /usr/local/bin/initctl_faker"
-
+COPY service-wrapper /usr/local/bin/service-wrapper
+RUN chmod +x /usr/local/bin/service-wrapper && \
+    ln -sf /usr/local/bin/service-wrapper /sbin/initctl && \
+    ln -sf /usr/local/bin/service-wrapper /sbin/start && \
+    ln -sf /usr/local/bin/service-wrapper /sbin/stop && \
+    ln -sf /usr/local/bin/service-wrapper /sbin/restart && \
+    ln -sf /usr/local/bin/service-wrapper /sbin/status && \
+    ln -sf /usr/local/bin/service-wrapper /usr/local/bin/systemctl && \
+    ln -sf /usr/local/bin/service-wrapper /usr/local/bin/service && \
+    echo "All fake service commands linked"
 
 # Set Ansible localhost inventory file
 RUN mkdir -p /etc/ansible

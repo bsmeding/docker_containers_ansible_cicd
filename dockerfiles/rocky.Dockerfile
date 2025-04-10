@@ -39,9 +39,6 @@ RUN python3 -m pip install --upgrade pip setuptools wheel
 RUN python3 -m pip install --upgrade pip setuptools wheel && \
     pip3 install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt
 
-# Set PATH to use virtualenv by default
-ENV PATH="/opt/venv/bin:$PATH"
-
 # Disable requiretty
 RUN sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/'  /etc/sudoers
 
