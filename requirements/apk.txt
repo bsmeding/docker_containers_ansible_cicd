@@ -1,6 +1,7 @@
 sudo
 python3
 py3-pip
+py3-virtualenv
 openssl
 ca-certificates
 sshpass
