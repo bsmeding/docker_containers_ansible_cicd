@@ -13,8 +13,9 @@ jobs:
       - name: Update timestamp file
         run: |
           echo "Last update: $(date -u)" > .last_keepalive
-          git config user.name "GitHub Bot"
-          git config user.email "bot@github.com"
+          git config --global user.name "keepalive-bot"
+          git config --global user.email "keepalive@github"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}
           git add .last_keepalive
           git commit -m "chore: keepalive ping" || echo "No changes to commit"
           git push

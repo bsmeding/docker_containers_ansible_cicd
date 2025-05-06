@@ -28,6 +28,7 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
 
+  # This needs to be kept in sync with the images build in build.sh!
   update-readme:
     needs: docker-matrix
     runs-on: ubuntu-latest
