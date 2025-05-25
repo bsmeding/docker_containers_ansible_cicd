@@ -1,5 +1,4 @@
 rpm
-dnf-plugins-core
 initscripts
 sudo
 which
