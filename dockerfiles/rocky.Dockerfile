@@ -15,11 +15,10 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 
 # Enable dev repo (CRB for Rocky 9, PowerTools for Rocky 8)
 # Install OS and Docker requirements
-# Install system packages
 RUN dnf install -y dnf-plugins-core epel-release && \
     xargs -a /tmp/dnf.txt dnf install -y && \
-    source /etc/os-release && \
-    if [[ "$VERSION_ID" == "9" ]]; then \
+    . /etc/os-release && \
+    if [ "$VERSION_ID" = "9" ]; then \
         dnf install -y libyaml; \
     else \
         dnf install -y libyaml-devel; \
