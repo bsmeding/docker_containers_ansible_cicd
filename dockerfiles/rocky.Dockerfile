@@ -13,7 +13,7 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
     /lib/systemd/system/basic.target.wants/* \
     /lib/systemd/system/anaconda.target.wants/*
 
-# Enable CRB or PowerTools depending on version
+# Enable dev repo (CRB for Rocky 9, PowerTools for Rocky 8)
 RUN dnf install -y dnf-plugins-core && \
     if grep -q 'release 8' /etc/redhat-release; then \
         dnf config-manager --enable powertools; \
@@ -21,28 +21,32 @@ RUN dnf install -y dnf-plugins-core && \
         dnf config-manager --set-enabled crb; \
     fi
 
-# Install EPEL and system packages
-RUN dnf install -y epel-release && \
-    dnf install -y $(cat /tmp/dnf.txt) && \
-    dnf clean all
-
-# Install Docker engine
+# Add Docker repo and install Docker CE (force el8 RPMs)
 RUN dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo && \
-    dnf install -y docker-ce docker-ce-cli containerd.io && \
+    sed -i 's/\$releasever/8/g' /etc/yum.repos.d/docker-ce.repo && \
+    dnf install -y \
+        epel-release \
+        $(cat /tmp/dnf.txt) \
+        docker-ce \
+        docker-ce-cli \
+        containerd.io \
+        docker-buildx-plugin \
+        docker-compose-plugin && \
+    dnf clean all && \
     systemctl enable docker
 
-# Upgrade pip and install Python packages
+# Upgrade pip and install Python requirements
 RUN python3 -m pip install --upgrade pip setuptools wheel && \
     pip3 install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt
 
-# Disable requiretty
-RUN sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/'  /etc/sudoers
+# Disable requiretty in sudo
+RUN sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers
 
-# Set local inventory
+# Set up local Ansible inventory
 RUN mkdir -p /etc/ansible && \
     echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts
 
-# Add support for systemd
+# Systemd + cgroups support
 VOLUME ["/sys/fs/cgroup"]
 STOPSIGNAL SIGRTMIN+3
 CMD ["/lib/systemd/systemd"]
