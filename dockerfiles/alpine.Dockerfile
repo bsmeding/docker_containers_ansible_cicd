@@ -35,4 +35,4 @@ RUN mkdir -p /etc/ansible && \
     echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts
 
 # Alpine does not use systemd
-CMD ["ansible-playbook", "--version"]
+CMD ["/bin/sh"]
