@@ -14,7 +14,7 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
     /lib/systemd/system/anaconda.target.wants/*
 
 # Install general requirements
-RUN dnf install -y dnf-plugins-core epel-release && \
+RUN dnf install -y dnf-plugins-core epel-release findutils && \
     xargs -a /tmp/dnf.txt dnf install -y
 
 # Install YAML dev lib (only exists in Rocky 8)
