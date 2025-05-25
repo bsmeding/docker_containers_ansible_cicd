@@ -15,8 +15,15 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 
 # Enable dev repo (CRB for Rocky 9, PowerTools for Rocky 8)
 # Install OS and Docker requirements
+# Install system packages
 RUN dnf install -y dnf-plugins-core epel-release && \
     xargs -a /tmp/dnf.txt dnf install -y && \
+    source /etc/os-release && \
+    if [[ "$VERSION_ID" == "9" ]]; then \
+        dnf install -y libyaml; \
+    else \
+        dnf install -y libyaml-devel; \
+    fi && \
     dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo && \
     sed -i 's/\$releasever/8/g' /etc/yum.repos.d/docker-ce.repo && \
     dnf install -y docker-ce docker-ce-cli containerd.io && \

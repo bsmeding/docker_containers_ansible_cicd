@@ -1,6 +1,5 @@
 rpm
 dnf-plugins-core
-libyaml-devel
 initscripts
 sudo
 which
