@@ -14,24 +14,12 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
     /lib/systemd/system/anaconda.target.wants/*
 
 # Enable dev repo (CRB for Rocky 9, PowerTools for Rocky 8)
-RUN dnf install -y dnf-plugins-core && \
-    if grep -q 'release 8' /etc/redhat-release; then \
-        dnf config-manager --enable powertools; \
-    else \
-        dnf config-manager --set-enabled crb; \
-    fi
-
-# Add Docker repo and install Docker CE (force el8 RPMs)
-RUN dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo && \
+# Install OS and Docker requirements
+RUN dnf install -y dnf-plugins-core epel-release && \
+    xargs -a /tmp/dnf.txt dnf install -y && \
+    dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo && \
     sed -i 's/\$releasever/8/g' /etc/yum.repos.d/docker-ce.repo && \
-    dnf install -y \
-        epel-release \
-        $(cat /tmp/dnf.txt) \
-        docker-ce \
-        docker-ce-cli \
-        containerd.io \
-        docker-buildx-plugin \
-        docker-compose-plugin && \
+    dnf install -y docker-ce docker-ce-cli containerd.io && \
     dnf clean all && \
     systemctl enable docker
 
