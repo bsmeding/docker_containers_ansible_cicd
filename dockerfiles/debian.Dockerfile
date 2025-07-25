@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=debian:bullseye
+ARG BASE_IMAGE=debian:bookworm
 FROM ${BASE_IMAGE}
 
 ARG DEBIAN_FRONTEND=noninteractive
