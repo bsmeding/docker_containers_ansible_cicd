@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=rockylinux:8
+ARG BASE_IMAGE=rockylinux:9
 FROM ${BASE_IMAGE}
 
 COPY requirements/dnf.txt /tmp/dnf.txt
