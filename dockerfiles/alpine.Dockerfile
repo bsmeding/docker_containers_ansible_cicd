@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=alpine:3.21.3
+ARG BASE_IMAGE=alpine:3.22.2
 FROM ${BASE_IMAGE}
 
 # Copy package requirement files
