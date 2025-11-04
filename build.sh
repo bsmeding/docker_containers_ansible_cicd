@@ -1,25 +1,33 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
 
-# Map: tag -> Dockerfile + base image
-declare -A builds=(
-  [ubuntu2004]="ubuntu.Dockerfile ubuntu:20.04"
-  [ubuntu2204]="ubuntu.Dockerfile ubuntu:22.04"
-  [ubuntu2404]="ubuntu.Dockerfile ubuntu:24.04"
-  [ubuntu]="ubuntu.Dockerfile ubuntu:24.04"
-  [debian11]="debian.Dockerfile debian:bullseye"
-  [debian12]="debian.Dockerfile debian:bookworm"
-  [debian13]="debian.Dockerfile debian:trixie"
-  [debian]="debian.Dockerfile debian:trixie"
-  [rockylinux8]="rocky.Dockerfile rockylinux:8"
-  [rockylinux9]="rocky.Dockerfile rockylinux:9"
-  [rockylinux]="rocky.Dockerfile rockylinux:9"
-  [alpine3.20]="alpine.Dockerfile alpine:3.20"
-  [alpine3.21]="alpine.Dockerfile alpine:3.21"
-  [alpine3.22]="alpine.Dockerfile alpine:3.22"
-  [alpine3]="alpine.Dockerfile alpine:3.22"
-)
+# Get build info for a tag: returns "dockerfile base_image"
+get_build_info() {
+  case "$1" in
+    ubuntu2004) echo "ubuntu.Dockerfile ubuntu:20.04" ;;
+    ubuntu2204) echo "ubuntu.Dockerfile ubuntu:22.04" ;;
+    ubuntu2404) echo "ubuntu.Dockerfile ubuntu:24.04" ;;
+    ubuntu) echo "ubuntu.Dockerfile ubuntu:24.04" ;;
+    debian11) echo "debian.Dockerfile debian:bullseye" ;;
+    debian12) echo "debian.Dockerfile debian:bookworm" ;;
+    debian13) echo "debian.Dockerfile debian:trixie" ;;
+    debian) echo "debian.Dockerfile debian:trixie" ;;
+    rockylinux8) echo "rocky.Dockerfile rockylinux:8" ;;
+    rockylinux9) echo "rocky.Dockerfile rockylinux:9" ;;
+    rockylinux) echo "rocky.Dockerfile rockylinux:9" ;;
+    alpine3.20) echo "alpine.Dockerfile alpine:3.20" ;;
+    alpine3.21) echo "alpine.Dockerfile alpine:3.21" ;;
+    alpine3.22) echo "alpine.Dockerfile alpine:3.22" ;;
+    alpine3) echo "alpine.Dockerfile alpine:3.22" ;;
+    *) echo "" ;;
+  esac
+}
+
+# Get all available tags
+get_all_tags() {
+  echo "ubuntu2004 ubuntu2204 ubuntu2404 ubuntu debian11 debian12 debian13 debian rockylinux8 rockylinux9 rockylinux alpine3.20 alpine3.21 alpine3.22 alpine3"
+}
 
 # Get correct Ansible version per distro version
 get_ansible_version() {
@@ -32,43 +40,35 @@ get_ansible_version() {
   fi
 }
 
-# Common pip packages
-common_pip_packages="
-cryptography
-yamllint
-pynautobot
-pynetbox
-jmespath
-netaddr
-pywinrm
-# Network automation
-netmiko
-ncclient
-scrapli
-napalm
-paramiko
-textfsm
-ntc-templates
-pyats
-# CI/CD testing
-ansible-lint
-molecule
-molecule-plugins
-pytest
-pytest-ansible
-# Cloud/API automation
-requests
-boto3
-openstacksdk
-kubernetes
-# Utilities
-jinja2
-passlib
-"
+# Parse command-line arguments
+BUILD_TAG=""
+PUSH_FLAG=""
+for arg in "$@"; do
+  if [[ "$arg" == "--push" ]]; then
+    PUSH_FLAG="--push"
+  elif [[ "$arg" != "--push" && -z "$BUILD_TAG" ]]; then
+    BUILD_TAG="$arg"
+  fi
+done
+
+# Determine which tags to build
+if [[ -n "${BUILD_TAG:-}" ]]; then
+  # Build only the specified tag
+  build_info=$(get_build_info "$BUILD_TAG")
+  if [[ -z "$build_info" ]]; then
+    echo "❌ Error: Unknown tag '$BUILD_TAG'"
+    echo "Available tags: $(get_all_tags)"
+    exit 1
+  fi
+  tags_to_build=("$BUILD_TAG")
+else
+  # Build all tags
+  tags_to_build=($(get_all_tags))
+fi
 
 # Loop through builds
-for tag in "${!builds[@]}"; do
-  IFS=' ' read -r dockerfile base_image <<< "${builds[$tag]}"
+for tag in "${tags_to_build[@]}"; do
+  IFS=' ' read -r dockerfile base_image <<< "$(get_build_info "$tag")"
   echo -e "\n🔨 Building image for: $tag"
   echo "📦 Using base image: $base_image"
   echo "📄 Dockerfile: $dockerfile"
@@ -80,18 +80,12 @@ for tag in "${!builds[@]}"; do
   echo "📄 Writing requirements/pip.txt"
   {
     echo "$ansible_version"
-    echo "$common_pip_packages"
+    cat requirements/pip-common.txt
   } > requirements/pip.txt
 
   echo "--- requirements/pip.txt for $tag ---"
   cat requirements/pip.txt
   echo "------------------------------------"
-
-  # Check if it is a Git push
-  PUSH_FLAG=""
-  if [[ "${1:-}" == "--push" ]]; then
-    PUSH_FLAG="--push"
-  fi
 
   # Build image
   docker buildx build \
@@ -116,4 +110,8 @@ for tag in "${!builds[@]}"; do
   # fi
 done
 
-echo -e "\n🎉 All builds completed!"
+if [[ -n "${BUILD_TAG:-}" ]]; then
+  echo -e "\n🎉 Build completed: $BUILD_TAG"
+else
+  echo -e "\n🎉 All builds completed!"
+fi

@@ -15,12 +15,14 @@ RUN apt-get update \
 
 RUN sed -i 's/^\($ModLoad imklog\)/#\1/' /etc/rsyslog.conf
 
-# Set system python to Externally managed
-RUN rm -f /usr/lib/python3.11/EXTERNALLY-MANAGED
+# Remove EXTERNALLY-MANAGED file for the installed Python version
+RUN PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')") && \
+    rm -f /usr/lib/python${PYTHON_VERSION}/EXTERNALLY-MANAGED || \
+    find /usr/lib -name "EXTERNALLY-MANAGED" -type f -delete || true
 
 # Upgrade pip to latest version and install packages
-RUN python3 -m pip install --upgrade pip setuptools wheel && \
-    pip3 install --no-cache-dir --break-system-packages --index-url https://pypi.org/simple -r /tmp/pip.txt
+RUN python3 -m pip install --upgrade --ignore-installed pip setuptools wheel && \
+    pip3 install --no-cache-dir --break-system-packages --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt
 
 # Set Ansible localhost inventory file
 RUN mkdir -p /etc/ansible

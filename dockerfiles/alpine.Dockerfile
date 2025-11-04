@@ -18,10 +18,12 @@ RUN apk add --no-cache \
     make
 
 # Create and activate virtualenv
+# Filter out pyats (not available for Alpine/musl) before installing
 RUN python3 -m venv /opt/venv && \
     . /opt/venv/bin/activate && \
     pip install --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r /tmp/pip.txt
+    grep -v '^pyats$' /tmp/pip.txt > /tmp/pip-filtered.txt && \
+    pip install --no-cache-dir -r /tmp/pip-filtered.txt
 
 # Make venv available in PATH
 ENV PATH="/opt/venv/bin:$PATH"
