@@ -7,7 +7,7 @@ COPY requirements/apt.txt /tmp/apt.txt
 COPY requirements/pip.txt /tmp/pip.txt
 
 RUN apt-get update \
-    && xargs -a /tmp/apt.txt apt-get install -y --no-install-recommends \
+    && grep -v '^software-properties-common' /tmp/apt.txt | xargs apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man \
