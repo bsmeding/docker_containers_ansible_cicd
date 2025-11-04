@@ -41,6 +41,29 @@ pynetbox
 jmespath
 netaddr
 pywinrm
+# Network automation
+netmiko
+ncclient
+scrapli
+napalm
+paramiko
+textfsm
+ntc-templates
+pyats
+# CI/CD testing
+ansible-lint
+molecule
+molecule-plugins
+pytest
+pytest-ansible
+# Cloud/API automation
+requests
+boto3
+openstacksdk
+kubernetes
+# Utilities
+jinja2
+passlib
 "
 
 # Loop through builds
