@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ubuntu:24.10
+ARG BASE_IMAGE=ubuntu:oracular-20250619
 FROM ${BASE_IMAGE}
 
 ARG DEBIAN_FRONTEND=noninteractive
