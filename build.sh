@@ -10,13 +10,15 @@ declare -A builds=(
   [ubuntu]="ubuntu.Dockerfile ubuntu:24.04"
   [debian11]="debian.Dockerfile debian:bullseye"
   [debian12]="debian.Dockerfile debian:bookworm"
-  [debian]="debian.Dockerfile debian:bookworm"
+  [debian13]="debian.Dockerfile debian:trixie"
+  [debian]="debian.Dockerfile debian:trixie"
   [rockylinux8]="rocky.Dockerfile rockylinux:8"
   [rockylinux9]="rocky.Dockerfile rockylinux:9"
   [rockylinux]="rocky.Dockerfile rockylinux:9"
   [alpine3.20]="alpine.Dockerfile alpine:3.20"
   [alpine3.21]="alpine.Dockerfile alpine:3.21"
-  [alpine3]="alpine.Dockerfile alpine:3.21"
+  [alpine3.22]="alpine.Dockerfile alpine:3.22"
+  [alpine3]="alpine.Dockerfile alpine:3.22"
 )
 
 # Get correct Ansible version per distro version
