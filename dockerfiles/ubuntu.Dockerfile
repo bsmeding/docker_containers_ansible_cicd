@@ -9,11 +9,16 @@ COPY requirements/pip.txt /tmp/pip.txt
 # System dependencies
 RUN apt-get update && \
     xargs -a /tmp/apt.txt apt-get install -y --no-install-recommends && \
+    apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends python3.13 python3.13-venv python3.13-dev && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man
 
-# Create and activate virtual environment
-RUN python3 -m venv /opt/venv
+# Create and activate virtual environment using Python 3.13
+RUN python3.13 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Install pip packages into venv

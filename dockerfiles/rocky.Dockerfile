@@ -17,6 +17,11 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 RUN dnf install -y dnf-plugins-core epel-release findutils && \
     xargs -a /tmp/dnf.txt dnf install -y
 
+# Install Python 3.13 explicitly (max version for ansible compatibility)
+RUN dnf install -y python3.13 python3.13-pip python3.13-devel && \
+    alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 && \
+    alternatives --set python3 /usr/bin/python3.13 || true
+
 # Install YAML dev lib (only exists in Rocky 8)
 RUN dnf install -y libyaml-devel || true
 
@@ -32,9 +37,9 @@ RUN if grep -q 'release 8' /etc/redhat-release; then \
     fi && \
     dnf clean all
 
-# Install Python requirements
-RUN python3 -m pip install --upgrade pip setuptools wheel && \
-    pip3 install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt
+# Install Python requirements using Python 3.13
+RUN python3.13 -m pip install --upgrade pip setuptools wheel && \
+    python3.13 -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt
 
 # Disable sudo requiretty
 RUN sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers
