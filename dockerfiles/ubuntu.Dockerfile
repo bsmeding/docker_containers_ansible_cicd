@@ -12,13 +12,22 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends software-properties-common && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
-    apt-get install -y --no-install-recommends python3.13 python3.13-venv python3.13-dev && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 && \
+    (apt-get install -y --no-install-recommends python3.13 python3.13-venv python3.13-dev && \
+     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 && \
+     echo "3.13" > /tmp/python_version) || \
+    (apt-get install -y --no-install-recommends python3.12 python3.12-venv python3.12-dev && \
+     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 && \
+     echo "3.12" > /tmp/python_version) || \
+    (apt-get install -y --no-install-recommends python3.11 python3.11-venv python3.11-dev && \
+     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
+     echo "3.11" > /tmp/python_version) && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man
 
-# Create and activate virtual environment using Python 3.13
-RUN python3.13 -m venv /opt/venv
+# Create and activate virtual environment using highest available Python <= 3.13
+RUN PYTHON_VER=$(cat /tmp/python_version) && \
+    python${PYTHON_VER} -m venv /opt/venv && \
+    rm -f /tmp/python_version
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Install pip packages into venv
