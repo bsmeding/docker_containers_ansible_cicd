@@ -47,9 +47,9 @@ RUN if grep -q 'release 8' /etc/redhat-release; then \
     dnf clean all
 
 # Install Python requirements
-# Filter out pyats (not available for Rocky Linux) before installing
+# Filter out pyats and molecule-plugins (not available for Rocky Linux 8) before installing
 # Detect which Python version is actually available
-RUN grep -v '^pyats$' /tmp/pip.txt > /tmp/pip-filtered.txt && \
+RUN grep -v -E '^(pyats|molecule-plugins)$' /tmp/pip.txt > /tmp/pip-filtered.txt && \
     if [ "$PYTHON_VERSION" != "system" ] && command -v python${PYTHON_VERSION} >/dev/null 2>&1; then \
         python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel && \
         python${PYTHON_VERSION} -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip-filtered.txt; \
