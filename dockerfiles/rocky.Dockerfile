@@ -22,9 +22,13 @@ RUN dnf install -y dnf-plugins-core epel-release findutils && \
 
 # Install Python version based on PYTHON_VERSION build arg (max 3.13 for ansible compatibility)
 RUN if [ "$PYTHON_VERSION" != "system" ]; then \
-        dnf install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-pip python${PYTHON_VERSION}-devel && \
-        alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1 && \
-        alternatives --set python3 /usr/bin/python${PYTHON_VERSION} || true; \
+        (dnf install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-pip python${PYTHON_VERSION}-devel 2>/dev/null && \
+         alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1 && \
+         alternatives --set python3 /usr/bin/python${PYTHON_VERSION} || true) || \
+        (echo "Python ${PYTHON_VERSION} not available, using system Python" && \
+         dnf install -y python3 python3-pip python3-devel); \
+    else \
+        dnf install -y python3 python3-pip python3-devel; \
     fi
 
 # Install YAML dev lib (only exists in Rocky 8)
@@ -43,12 +47,15 @@ RUN if grep -q 'release 8' /etc/redhat-release; then \
     dnf clean all
 
 # Install Python requirements
-RUN if [ "$PYTHON_VERSION" != "system" ]; then \
+# Filter out pyats (not available for Rocky Linux) before installing
+# Detect which Python version is actually available
+RUN grep -v '^pyats$' /tmp/pip.txt > /tmp/pip-filtered.txt && \
+    if [ "$PYTHON_VERSION" != "system" ] && command -v python${PYTHON_VERSION} >/dev/null 2>&1; then \
         python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel && \
-        python${PYTHON_VERSION} -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt; \
+        python${PYTHON_VERSION} -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip-filtered.txt; \
     else \
         python3 -m pip install --upgrade pip setuptools wheel && \
-        python3 -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt; \
+        python3 -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip-filtered.txt; \
     fi
 
 # Disable sudo requiretty

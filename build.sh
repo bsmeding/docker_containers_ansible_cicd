@@ -55,8 +55,12 @@ get_python_version() {
       # Debian 13+: try 3.13, fallback to system
       echo "3.13"
       ;;
-    rockylinux8|rockylinux9|rockylinux)
-      # Rocky Linux: use system Python or 3.13 if available
+    rockylinux8)
+      # Rocky Linux 8: use system Python (3.13 not available)
+      echo "system"
+      ;;
+    rockylinux9|rockylinux)
+      # Rocky Linux 9+: try 3.13, fallback to system
       echo "3.13"
       ;;
     alpine3.20|alpine3.21|alpine3.22|alpine3)

@@ -28,7 +28,7 @@ jobs:
           - tag: debian
             python_version: 3.13
           - tag: rockylinux8
-            python_version: 3.13
+            python_version: system
           - tag: rockylinux9
             python_version: 3.13
           - tag: rockylinux
