@@ -47,8 +47,12 @@ get_python_version() {
       # Ubuntu versions: use system Python or fallback to available version
       echo "system"  # Will use system Python (3.8 for 20.04, 3.10 for 22.04, 3.12 for 24.04)
       ;;
-    debian11|debian12|debian13|debian)
-      # Debian: use system Python or 3.13 if available
+    debian11|debian12)
+      # Debian 11/12: use system Python (3.13 not available in repos)
+      echo "system"
+      ;;
+    debian13|debian)
+      # Debian 13+: try 3.13, fallback to system
       echo "3.13"
       ;;
     rockylinux8|rockylinux9|rockylinux)

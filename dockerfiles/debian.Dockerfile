@@ -11,8 +11,12 @@ COPY requirements/pip.txt /tmp/pip.txt
 RUN apt-get update \
     && grep -v '^software-properties-common' /tmp/apt.txt | xargs apt-get install -y --no-install-recommends \
     && if [ "$PYTHON_VERSION" != "system" ]; then \
-        apt-get install -y --no-install-recommends python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev && \
-        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1; \
+        (apt-get install -y --no-install-recommends python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev 2>/dev/null && \
+         update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1) || \
+        (echo "Python ${PYTHON_VERSION} not available, using system Python" && \
+         apt-get install -y --no-install-recommends python3 python3-venv python3-dev); \
+    else \
+        apt-get install -y --no-install-recommends python3 python3-venv python3-dev; \
     fi \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
@@ -31,7 +35,8 @@ RUN if [ "$PYTHON_VERSION" != "system" ]; then \
     find /usr/lib/python${PYTHON_VER} -name "EXTERNALLY-MANAGED" -type f -delete || true
 
 # Upgrade pip to latest version and install packages
-RUN if [ "$PYTHON_VERSION" != "system" ]; then \
+# Detect which Python version is actually available
+RUN if [ "$PYTHON_VERSION" != "system" ] && command -v python${PYTHON_VERSION} >/dev/null 2>&1; then \
         python${PYTHON_VERSION} -m pip install --upgrade --ignore-installed pip setuptools wheel && \
         python${PYTHON_VERSION} -m pip install --no-cache-dir --break-system-packages --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt; \
     else \
