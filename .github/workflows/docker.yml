@@ -23,8 +23,8 @@ jobs:
             python_version: 3.13
           - tag: debian12
             python_version: 3.13
-          - tag: debian13
-            python_version: 3.13
+          # - tag: debian13
+          #   python_version: 3.13
           - tag: debian
             python_version: 3.13
           - tag: rockylinux8
@@ -34,13 +34,13 @@ jobs:
           - tag: rockylinux
             python_version: 3.13
           - tag: alpine3.20
-            python_version: 3.13
+            python_version: system
           - tag: alpine3.21
-            python_version: 3.13
-          - tag: alpine3.22
-            python_version: 3.13
+            python_version: system
+          # - tag: alpine3.22
+          #   python_version: system
           - tag: alpine3
-            python_version: 3.13
+            python_version: system
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5

@@ -56,8 +56,8 @@ get_python_version() {
       echo "3.13"
       ;;
     alpine3.20|alpine3.21|alpine3.22|alpine3)
-      # Alpine: use 3.13
-      echo "3.13"
+      # Alpine versions: use system Python (3.13 may not be available in all versions)
+      echo "system"
       ;;
     *)
       echo "system"

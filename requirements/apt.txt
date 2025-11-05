@@ -9,6 +9,8 @@ wget
 git
 libffi-dev
 libssl-dev
+libxml2-dev
+libxslt1-dev
 procps
 python3-pip
 python3-dev
