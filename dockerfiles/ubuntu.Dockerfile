@@ -1,21 +1,33 @@
 ARG BASE_IMAGE=ubuntu:oracular-20250619
+ARG PYTHON_VERSION=system
 FROM ${BASE_IMAGE}
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG PYTHON_VERSION
 
 COPY requirements/apt.txt /tmp/apt.txt
 COPY requirements/pip.txt /tmp/pip.txt
 
 # System dependencies
-# Use system Python 3 (Ubuntu 20.04 has Python 3.8, which is < 3.14)
-# This avoids Python 3.14 compatibility issues with Ansible
+# Install Python version based on PYTHON_VERSION build arg (max 3.13 to avoid Ansible compatibility issues)
 RUN apt-get update && \
     xargs -a /tmp/apt.txt apt-get install -y --no-install-recommends && \
+    if [ "$PYTHON_VERSION" != "system" ]; then \
+        apt-get install -y --no-install-recommends software-properties-common && \
+        add-apt-repository -y ppa:deadsnakes/ppa && \
+        apt-get update && \
+        apt-get install -y --no-install-recommends python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev && \
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1; \
+    fi && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man
 
-# Create and activate virtual environment using system Python 3
-RUN python3 -m venv /opt/venv
+# Create and activate virtual environment
+RUN if [ "$PYTHON_VERSION" != "system" ]; then \
+        python${PYTHON_VERSION} -m venv /opt/venv; \
+    else \
+        python3 -m venv /opt/venv; \
+    fi
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Install pip packages into venv

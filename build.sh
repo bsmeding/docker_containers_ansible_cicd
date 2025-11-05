@@ -40,6 +40,31 @@ get_ansible_version() {
   fi
 }
 
+# Get correct Python version per distro (max 3.13 to avoid Ansible compatibility issues)
+get_python_version() {
+  case "$1" in
+    ubuntu2004|ubuntu2204|ubuntu2404|ubuntu)
+      # Ubuntu versions: use system Python or fallback to available version
+      echo "system"  # Will use system Python (3.8 for 20.04, 3.10 for 22.04, 3.12 for 24.04)
+      ;;
+    debian11|debian12|debian13|debian)
+      # Debian: use system Python or 3.13 if available
+      echo "3.13"
+      ;;
+    rockylinux8|rockylinux9|rockylinux)
+      # Rocky Linux: use system Python or 3.13 if available
+      echo "3.13"
+      ;;
+    alpine3.20|alpine3.21|alpine3.22|alpine3)
+      # Alpine: use 3.13
+      echo "3.13"
+      ;;
+    *)
+      echo "system"
+      ;;
+  esac
+}
+
 # Parse command-line arguments
 BUILD_TAG=""
 PUSH_FLAG=""
@@ -75,6 +100,10 @@ for tag in "${tags_to_build[@]}"; do
 
   # Set Ansible version per distro
   ansible_version=$(get_ansible_version "$tag")
+  
+  # Set Python version per distro (max 3.13)
+  # Use PYTHON_VERSION from environment if set, otherwise use get_python_version function
+  python_version=${PYTHON_VERSION:-$(get_python_version "$tag")}
 
   # Create pip requirements file dynamically
   echo "📄 Writing requirements/pip.txt"
@@ -86,12 +115,14 @@ for tag in "${tags_to_build[@]}"; do
   echo "--- requirements/pip.txt for $tag ---"
   cat requirements/pip.txt
   echo "------------------------------------"
+  echo "🐍 Python version for $tag: $python_version"
 
   # Build image
   docker buildx build \
     $PUSH_FLAG \
     -f dockerfiles/$dockerfile \
     --build-arg BASE_IMAGE=$base_image \
+    --build-arg PYTHON_VERSION=$python_version \
     -t bsmeding/ansible_cicd_${tag}:latest .
 
   echo "✅ Image built: bsmeding/ansible_cicd_${tag}:latest"

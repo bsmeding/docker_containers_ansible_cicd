@@ -8,6 +8,39 @@ on:
 jobs:
   docker-matrix:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - tag: ubuntu2004
+            python_version: system
+          - tag: ubuntu2204
+            python_version: system
+          - tag: ubuntu2404
+            python_version: system
+          - tag: ubuntu
+            python_version: system
+          - tag: debian11
+            python_version: 3.13
+          - tag: debian12
+            python_version: 3.13
+          - tag: debian13
+            python_version: 3.13
+          - tag: debian
+            python_version: 3.13
+          - tag: rockylinux8
+            python_version: 3.13
+          - tag: rockylinux9
+            python_version: 3.13
+          - tag: rockylinux
+            python_version: 3.13
+          - tag: alpine3.20
+            python_version: 3.13
+          - tag: alpine3.21
+            python_version: 3.13
+          - tag: alpine3.22
+            python_version: 3.13
+          - tag: alpine3
+            python_version: 3.13
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -24,7 +57,7 @@ jobs:
       - name: Run custom build script and push
         run: |
           chmod +x build.sh
-          ./build.sh --push
+          PYTHON_VERSION=${{ matrix.python_version }} ./build.sh ${{ matrix.tag }} --push
         env:
           DOCKER_BUILDKIT: 1
 

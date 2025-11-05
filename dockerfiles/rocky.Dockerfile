@@ -1,5 +1,8 @@
 ARG BASE_IMAGE=rockylinux:9
+ARG PYTHON_VERSION=system
 FROM ${BASE_IMAGE}
+
+ARG PYTHON_VERSION
 
 COPY requirements/dnf.txt /tmp/dnf.txt
 COPY requirements/pip.txt /tmp/pip.txt
@@ -17,10 +20,12 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 RUN dnf install -y dnf-plugins-core epel-release findutils && \
     xargs -a /tmp/dnf.txt dnf install -y
 
-# Install Python 3.13 explicitly (max version for ansible compatibility)
-RUN dnf install -y python3.13 python3.13-pip python3.13-devel && \
-    alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 && \
-    alternatives --set python3 /usr/bin/python3.13 || true
+# Install Python version based on PYTHON_VERSION build arg (max 3.13 for ansible compatibility)
+RUN if [ "$PYTHON_VERSION" != "system" ]; then \
+        dnf install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-pip python${PYTHON_VERSION}-devel && \
+        alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1 && \
+        alternatives --set python3 /usr/bin/python${PYTHON_VERSION} || true; \
+    fi
 
 # Install YAML dev lib (only exists in Rocky 8)
 RUN dnf install -y libyaml-devel || true
@@ -37,9 +42,14 @@ RUN if grep -q 'release 8' /etc/redhat-release; then \
     fi && \
     dnf clean all
 
-# Install Python requirements using Python 3.13
-RUN python3.13 -m pip install --upgrade pip setuptools wheel && \
-    python3.13 -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt
+# Install Python requirements
+RUN if [ "$PYTHON_VERSION" != "system" ]; then \
+        python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel && \
+        python${PYTHON_VERSION} -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt; \
+    else \
+        python3 -m pip install --upgrade pip setuptools wheel && \
+        python3 -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt; \
+    fi
 
 # Disable sudo requiretty
 RUN sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers
