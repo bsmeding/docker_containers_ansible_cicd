@@ -14,8 +14,7 @@ jobs:
       - name: Set matrix
         id: set-matrix
         run: |
-          cat >> $GITHUB_OUTPUT << 'EOF'
-          matrix=[
+          matrix_json='[
             {"tag":"ubuntu2004","python_version":"system"},
             {"tag":"ubuntu2204","python_version":"system"},
             {"tag":"ubuntu2404","python_version":"system"},
@@ -30,8 +29,10 @@ jobs:
             {"tag":"alpine3.20","python_version":"system"},
             {"tag":"alpine3.21","python_version":"system"},
             {"tag":"alpine3","python_version":"system"}
-          ]
-          EOF
+          ]'
+          echo "matrix<<EOF" >> $GITHUB_OUTPUT
+          echo "$matrix_json" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
   docker-matrix:
     needs: setup
