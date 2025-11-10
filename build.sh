@@ -125,10 +125,24 @@ for tag in "${tags_to_build[@]}"; do
   echo "------------------------------------"
   echo "🐍 Python version for $tag: $python_version"
 
-  # Build image for multiple platforms
+  # Determine platforms based on image age
+  # Older images (Rocky 8, Ubuntu 20.04, Debian 11) build only amd64 to save time
+  # Newer images build for both amd64 and arm64
+  case "$tag" in
+    rockylinux8|ubuntu2004|debian11)
+      platforms="linux/amd64"
+      echo "⚠️  Building $tag for amd64 only (legacy image)"
+      ;;
+    *)
+      platforms="linux/amd64,linux/arm64"
+      echo "✅ Building $tag for amd64 and arm64"
+      ;;
+  esac
+
+  # Build image for determined platforms
   docker buildx build \
     $PUSH_FLAG \
-    --platform linux/amd64,linux/arm64 \
+    --platform $platforms \
     -f dockerfiles/$dockerfile \
     --build-arg BASE_IMAGE=$base_image \
     --build-arg PYTHON_VERSION=$python_version \
