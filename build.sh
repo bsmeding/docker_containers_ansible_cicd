@@ -125,9 +125,10 @@ for tag in "${tags_to_build[@]}"; do
   echo "------------------------------------"
   echo "🐍 Python version for $tag: $python_version"
 
-  # Build image
+  # Build image for multiple platforms
   docker buildx build \
     $PUSH_FLAG \
+    --platform linux/amd64,linux/arm64 \
     -f dockerfiles/$dockerfile \
     --build-arg BASE_IMAGE=$base_image \
     --build-arg PYTHON_VERSION=$python_version \
