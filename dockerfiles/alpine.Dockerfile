@@ -49,9 +49,15 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN apk del gcc musl-dev libffi-dev cargo make && \
     rm -rf /root/.cache /var/cache/apk/*
 
-# Set Ansible localhost inventory file
+# Set Ansible localhost inventory file and configure interpreter
 RUN mkdir -p /etc/ansible && \
-    echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts
+    echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts && \
+    echo -e '[defaults]\ninterpreter_python=/opt/venv/bin/python3' > /etc/ansible/ansible.cfg
+
+# Create symlinks so Ansible can find the venv Python interpreter
+# This ensures Ansible uses the venv Python and can find packages installed via pip
+RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
+    ln -sf /opt/venv/bin/pip3 /usr/local/bin/pip3-ansible
 
 # Alpine does not use systemd
 CMD ["/bin/sh"]

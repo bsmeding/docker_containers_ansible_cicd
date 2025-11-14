@@ -25,28 +25,27 @@ RUN apt-get update \
 
 RUN sed -i 's/^\($ModLoad imklog\)/#\1/' /etc/rsyslog.conf
 
-# Remove EXTERNALLY-MANAGED file for the installed Python version
-RUN if [ "$PYTHON_VERSION" != "system" ]; then \
-        PYTHON_VER="$PYTHON_VERSION"; \
-    else \
-        PYTHON_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"); \
-    fi && \
-    rm -f /usr/lib/python${PYTHON_VER}/EXTERNALLY-MANAGED || \
-    find /usr/lib/python${PYTHON_VER} -name "EXTERNALLY-MANAGED" -type f -delete || true
-
-# Upgrade pip to latest version and install packages
-# Detect which Python version is actually available
+# Create and activate virtual environment
 RUN if [ "$PYTHON_VERSION" != "system" ] && command -v python${PYTHON_VERSION} >/dev/null 2>&1; then \
-        python${PYTHON_VERSION} -m pip install --upgrade --ignore-installed pip setuptools wheel && \
-        python${PYTHON_VERSION} -m pip install --no-cache-dir --break-system-packages --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt; \
+        python${PYTHON_VERSION} -m venv /opt/venv; \
     else \
-        python3 -m pip install --upgrade --ignore-installed pip setuptools wheel && \
-        python3 -m pip install --no-cache-dir --break-system-packages --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip.txt; \
+        python3 -m venv /opt/venv; \
     fi
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Set Ansible localhost inventory file
-RUN mkdir -p /etc/ansible
-RUN echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts
+# Install pip packages into venv
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r /tmp/pip.txt
+
+# Set Ansible localhost inventory file and configure interpreter
+RUN mkdir -p /etc/ansible && \
+    echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts && \
+    echo -e '[defaults]\ninterpreter_python=/opt/venv/bin/python3' > /etc/ansible/ansible.cfg
+
+# Create symlinks so Ansible can find the venv Python interpreter
+# This ensures Ansible uses the venv Python and can find packages installed via pip
+RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
+    ln -sf /opt/venv/bin/pip3 /usr/local/bin/pip3-ansible
 
 # Remove unnecessary getty and udev targets that result in high CPU usage when using
 # multiple containers with Molecule (https://github.com/ansible/molecule/issues/1104)

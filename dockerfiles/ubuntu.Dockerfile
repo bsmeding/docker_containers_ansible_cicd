@@ -45,9 +45,15 @@ RUN chmod +x /usr/local/bin/service-wrapper && \
     ln -sf /usr/local/bin/service-wrapper /usr/local/bin/service && \
     echo "All fake service commands linked"
 
-# Set Ansible localhost inventory file
-RUN mkdir -p /etc/ansible
-RUN echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts
+# Set Ansible localhost inventory file and configure interpreter
+RUN mkdir -p /etc/ansible && \
+    echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts && \
+    echo -e '[defaults]\ninterpreter_python=/opt/venv/bin/python3' > /etc/ansible/ansible.cfg
+
+# Create symlinks so Ansible can find the venv Python interpreter
+# This ensures Ansible uses the venv Python and can find packages installed via pip
+RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
+    ln -sf /opt/venv/bin/pip3 /usr/local/bin/pip3-ansible
 
 # Remove unnecessary getty and udev targets that result in high CPU usage when using
 # multiple containers with Molecule (https://github.com/ansible/molecule/issues/1104)

@@ -46,24 +46,32 @@ RUN if grep -q 'release 8' /etc/redhat-release; then \
     fi && \
     dnf clean all
 
+# Create and activate virtual environment
+RUN if [ "$PYTHON_VERSION" != "system" ] && command -v python${PYTHON_VERSION} >/dev/null 2>&1; then \
+        python${PYTHON_VERSION} -m venv /opt/venv; \
+    else \
+        python3 -m venv /opt/venv; \
+    fi
+ENV PATH="/opt/venv/bin:$PATH"
+
 # Install Python requirements
 # Filter out pyats and molecule-plugins (not available for Rocky Linux 8) before installing
-# Detect which Python version is actually available
 RUN grep -v -E '^(pyats|molecule-plugins)$' /tmp/pip.txt > /tmp/pip-filtered.txt && \
-    if [ "$PYTHON_VERSION" != "system" ] && command -v python${PYTHON_VERSION} >/dev/null 2>&1; then \
-        python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel && \
-        python${PYTHON_VERSION} -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip-filtered.txt; \
-    else \
-        python3 -m pip install --upgrade pip setuptools wheel && \
-        python3 -m pip install --no-cache-dir --ignore-installed --index-url https://pypi.org/simple -r /tmp/pip-filtered.txt; \
-    fi
+    pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r /tmp/pip-filtered.txt
 
 # Disable sudo requiretty
 RUN sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers
 
-# Default inventory for Ansible
+# Default inventory for Ansible and configure interpreter
 RUN mkdir -p /etc/ansible && \
-    echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts
+    echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts && \
+    echo -e '[defaults]\ninterpreter_python=/opt/venv/bin/python3' > /etc/ansible/ansible.cfg
+
+# Create symlinks so Ansible can find the venv Python interpreter
+# This ensures Ansible uses the venv Python and can find packages installed via pip
+RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
+    ln -sf /opt/venv/bin/pip3 /usr/local/bin/pip3-ansible
 
 VOLUME ["/sys/fs/cgroup"]
 STOPSIGNAL SIGRTMIN+3
