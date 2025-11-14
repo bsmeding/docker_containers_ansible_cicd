@@ -57,6 +57,7 @@ RUN if [ "$PYTHON_VERSION" != "system" ] && command -v python${PYTHON_VERSION} >
         ln -sf /opt/venv/bin/python3 /opt/venv/bin/python; \
     fi
 ENV PATH="/opt/venv/bin:$PATH"
+ENV ANSIBLE_PYTHON_INTERPRETER="/opt/venv/bin/python"
 
 # Install Python requirements
 # Filter out pyats and molecule-plugins (not available for Rocky Linux 8) before installing
@@ -70,7 +71,7 @@ RUN sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/' /etc/sudoers
 # Default inventory for Ansible and configure interpreter
 RUN mkdir -p /etc/ansible && \
     echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts && \
-    /opt/venv/bin/python3 -c "with open('/etc/ansible/ansible.cfg', 'w') as f: f.write('[defaults]\ninterpreter_python=/opt/venv/bin/python\n')"
+    /opt/venv/bin/python3 -c "with open('/etc/ansible/ansible.cfg', 'w') as f: f.write('[defaults]\ninterpreter_python=auto_silent\n')"
 
 # Create symlinks so Ansible can find the venv Python interpreter
 # This ensures Ansible uses the venv Python and can find packages installed via pip

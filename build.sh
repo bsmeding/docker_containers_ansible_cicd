@@ -159,8 +159,10 @@ for tag in "${tags_to_build[@]}"; do
   fi
 
   # Build image for determined platforms
+  # Use --pull to ensure base images are always fresh
   docker buildx build \
     $PUSH_FLAG \
+    --pull \
     --platform $platforms \
     -f dockerfiles/$dockerfile \
     --build-arg BASE_IMAGE=$base_image \
