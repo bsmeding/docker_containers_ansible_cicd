@@ -15,9 +15,6 @@ jobs:
         id: set-matrix
         run: |
           matrix_json='[
-            {"tag":"ubuntu2404","python_version":"system"},
-            {"tag":"ubuntu","python_version":"system"},
-            {"tag":"debian13","python_version":"3.13"},
             {"tag":"debian","python_version":"3.13"},
           ]'
           echo "matrix<<EOF" >> $GITHUB_OUTPUT
