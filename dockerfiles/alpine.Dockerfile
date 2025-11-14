@@ -36,6 +36,10 @@ RUN if [ "$PYTHON_VERSION" != "system" ]; then \
 # Filter out pyats (not available for Alpine/musl) before installing
 RUN PYTHON_VER=$(cat /tmp/python_version) && \
     python${PYTHON_VER} -m venv /opt/venv && \
+    # Ensure python symlink exists (some venvs only have python3)
+    if [ ! -f /opt/venv/bin/python ]; then \
+        ln -sf /opt/venv/bin/python3 /opt/venv/bin/python; \
+    fi && \
     . /opt/venv/bin/activate && \
     pip install --upgrade pip setuptools wheel && \
     grep -v '^pyats$' /tmp/pip.txt > /tmp/pip-filtered.txt && \
@@ -52,7 +56,7 @@ RUN apk del gcc musl-dev libffi-dev cargo make && \
 # Set Ansible localhost inventory file and configure interpreter
 RUN mkdir -p /etc/ansible && \
     echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts && \
-    /opt/venv/bin/python3 -c "with open('/etc/ansible/ansible.cfg', 'w') as f: f.write('[defaults]\ninterpreter_python=/opt/venv/bin/python3\n')"
+    /opt/venv/bin/python3 -c "with open('/etc/ansible/ansible.cfg', 'w') as f: f.write('[defaults]\ninterpreter_python=auto_silent\n')"
 
 # Create symlinks so Ansible can find the venv Python interpreter
 # This ensures Ansible uses the venv Python and can find packages installed via pip

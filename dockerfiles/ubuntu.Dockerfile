@@ -27,6 +27,10 @@ RUN if [ "$PYTHON_VERSION" != "system" ]; then \
         python${PYTHON_VERSION} -m venv /opt/venv; \
     else \
         python3 -m venv /opt/venv; \
+    fi && \
+    # Ensure python symlink exists (some venvs only have python3)
+    if [ ! -f /opt/venv/bin/python ]; then \
+        ln -sf /opt/venv/bin/python3 /opt/venv/bin/python; \
     fi
 ENV PATH="/opt/venv/bin:$PATH"
 
@@ -48,7 +52,7 @@ RUN chmod +x /usr/local/bin/service-wrapper && \
 # Set Ansible localhost inventory file and configure interpreter
 RUN mkdir -p /etc/ansible && \
     echo -e '[local]\nlocalhost ansible_connection=local' > /etc/ansible/hosts && \
-    /opt/venv/bin/python3 -c "with open('/etc/ansible/ansible.cfg', 'w') as f: f.write('[defaults]\ninterpreter_python=/opt/venv/bin/python3\n')"
+    /opt/venv/bin/python3 -c "with open('/etc/ansible/ansible.cfg', 'w') as f: f.write('[defaults]\ninterpreter_python=auto_silent\n')"
 
 # Create symlinks so Ansible can find the venv Python interpreter
 # This ensures Ansible uses the venv Python and can find packages installed via pip
