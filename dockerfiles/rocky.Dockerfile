@@ -79,4 +79,6 @@ RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
 
 VOLUME ["/sys/fs/cgroup"]
 STOPSIGNAL SIGRTMIN+3
-CMD ["/lib/systemd/systemd"]
+# Default to bash for general CI/CD usage
+# For Molecule testing, override with: docker run --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --tmpfs /run --tmpfs /run/lock bsmeding/ansible_cicd_rockylinux9:latest /lib/systemd/systemd
+CMD ["/bin/bash"]
