@@ -79,6 +79,7 @@ RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
 
 VOLUME ["/sys/fs/cgroup"]
 STOPSIGNAL SIGRTMIN+3
-# Default to bash for general CI/CD usage
+# Default CMD keeps container running for local testing
+# CI/CD systems will override this with their own commands
 # For Molecule testing, override with: docker run --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --tmpfs /run --tmpfs /run/lock bsmeding/ansible_cicd_rockylinux9:latest /lib/systemd/systemd
-CMD ["/bin/bash"]
+CMD ["sleep", "infinity"]

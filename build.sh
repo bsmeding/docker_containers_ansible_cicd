@@ -125,19 +125,38 @@ for tag in "${tags_to_build[@]}"; do
   echo "------------------------------------"
   echo "🐍 Python version for $tag: $python_version"
 
-  # Determine platforms based on image age
-  # Older images (Rocky 8, Ubuntu 20.04, Debian 11) build only amd64 to save time
-  # Newer images build for both amd64 and arm64
-  case "$tag" in
-    rockylinux8|ubuntu2004|debian11)
-      platforms="linux/amd64"
-      echo "⚠️  Building $tag for amd64 only (legacy image)"
-      ;;
-    *)
-      platforms="linux/amd64,linux/arm64"
-      echo "✅ Building $tag for amd64 and arm64"
-      ;;
-  esac
+  # Determine platforms based on build type and image age
+  # For local builds (no --push), use native platform only
+  # For pushes, use multi-platform builds
+  if [[ -n "$PUSH_FLAG" ]]; then
+    # Multi-platform build for Docker Hub
+    case "$tag" in
+      rockylinux8|ubuntu2004|debian11)
+        platforms="linux/amd64"
+        echo "⚠️  Building $tag for amd64 only (legacy image)"
+        ;;
+      *)
+        platforms="linux/amd64,linux/arm64"
+        echo "✅ Building $tag for amd64 and arm64 (multi-platform)"
+        ;;
+    esac
+  else
+    # Local build: use native platform only
+    native_arch=$(uname -m)
+    case "$native_arch" in
+      x86_64)
+        platforms="linux/amd64"
+        ;;
+      arm64|aarch64)
+        platforms="linux/arm64"
+        ;;
+      *)
+        platforms="linux/amd64"
+        echo "⚠️  Unknown architecture $native_arch, defaulting to amd64"
+        ;;
+    esac
+    echo "🔧 Local build: Building $tag for native platform ($platforms)"
+  fi
 
   # Build image for determined platforms
   docker buildx build \

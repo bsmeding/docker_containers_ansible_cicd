@@ -63,12 +63,97 @@ jobs:
 
 ---
 
+## 🧪 Molecule Testing
+
+These images are optimized for **Molecule** testing of Ansible roles. The images include systemd support and are pre-configured with Ansible and common dependencies.
+
+### Basic Molecule Configuration
+
+Create a `molecule/default/molecule.yml` file in your Ansible role:
+
+```yaml
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: bsmeding/ansible_cicd_${MOLECULE_DISTRO:-ubuntu2204}:latest
+    command: /lib/systemd/systemd
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      gather_facts: true
+      roles_path: "../../../"
+```
+
+### Key Configuration Options
+
+- **`command: /lib/systemd/systemd`** - Overrides the default bash CMD to enable systemd (required for service management)
+- **`privileged: true`** - Required for systemd to function properly
+- **`cgroupns_mode: host`** - Allows systemd to manage cgroups
+- **`volumes: /sys/fs/cgroup:/sys/fs/cgroup:rw`** - Mounts cgroup filesystem for systemd
+
+### Testing Multiple Distributions
+
+Use environment variables to test different distributions:
+
+```bash
+# Test on Ubuntu 22.04
+MOLECULE_DISTRO=ubuntu2204 molecule test
+
+# Test on Debian 12
+MOLECULE_DISTRO=debian12 molecule test
+
+# Test on Rocky Linux 9
+MOLECULE_DISTRO=rockylinux9 molecule test
+```
+
+### Advanced Configuration (Docker-in-Docker)
+
+For roles that need Docker (e.g., deploying containers), add Docker socket access:
+
+```yaml
+platforms:
+  - name: instance
+    image: bsmeding/ansible_cicd_${MOLECULE_DISTRO:-ubuntu2204}:latest
+    command: /lib/systemd/systemd
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/run/docker.sock:/var/run/docker.sock
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+    capabilities:
+      - SYS_ADMIN
+      - NET_ADMIN
+      - SYS_CHROOT
+      # ... additional capabilities as needed
+```
+
+### Ansible Interpreter Configuration
+
+The images are pre-configured with the correct Python interpreter path (`/opt/venv/bin/python`). When you install additional packages via `pip install` in your CI/CD pipeline, they will be automatically available to Ansible since everything runs in the same virtual environment.
+
+**Note:** Alpine images use `/bin/sh` as the default CMD and don't support systemd. Use Debian/Ubuntu/Rocky images for roles that require systemd.
+
+---
+
 ## 🛳 Available on Docker Hub
 
 All images are pushed to [Docker Hub](https://hub.docker.com/u/bsmeding):
 
 📦 [bsmeding/ansible_cicd_ubuntu2204](https://hub.docker.com/r/bsmeding/ansible_cicd_ubuntu2204)  
-📦 [bsmeding/ansible_cicd_debian11](https://hub.docker.com/r/bsmeding/ansible_cicd_debian11)  
+📦 [bsmeding/ansible_cicd_debian13](https://hub.docker.com/r/bsmeding/ansible_cicd_debian13)  
 ... and more!
 
 ---

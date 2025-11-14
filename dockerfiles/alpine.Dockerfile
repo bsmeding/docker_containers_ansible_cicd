@@ -64,4 +64,4 @@ RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
     ln -sf /opt/venv/bin/pip3 /usr/local/bin/pip3-ansible
 
 # Alpine does not use systemd
-CMD ["/bin/sh"]
+CMD ["sleep", "infinity"]

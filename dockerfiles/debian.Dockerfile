@@ -57,6 +57,7 @@ RUN rm -f /lib/systemd/system/systemd*udev* \
   && rm -f /lib/systemd/system/getty.target
 
 VOLUME ["/sys/fs/cgroup"]
-# Default to bash for general CI/CD usage
+# Default CMD keeps container running for local testing
+# CI/CD systems will override this with their own commands
 # For Molecule testing, override with: docker run --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --tmpfs /run --tmpfs /run/lock bsmeding/ansible_cicd_debian:latest /lib/systemd/systemd
-CMD ["/bin/bash"]
+CMD ["sleep", "infinity"]
