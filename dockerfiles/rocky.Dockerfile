@@ -78,6 +78,10 @@ RUN mkdir -p /etc/ansible && \
 RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
     ln -sf /opt/venv/bin/pip3 /usr/local/bin/pip3-ansible
 
+# Prepare writable remote tmp for Ansible
+RUN mkdir -p /var/tmp/.ansible && chmod 1777 /var/tmp /var/tmp/.ansible
+ENV ANSIBLE_REMOTE_TMP="/var/tmp/.ansible"
+    
 VOLUME ["/sys/fs/cgroup"]
 STOPSIGNAL SIGRTMIN+3
 # Default CMD keeps container running for local testing

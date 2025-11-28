@@ -79,18 +79,25 @@ driver:
   name: docker
 platforms:
   - name: instance
-    image: bsmeding/ansible_cicd_${MOLECULE_DISTRO:-ubuntu2204}:latest
-    command: /lib/systemd/systemd
+    image: "bsmeding/ansible_cicd_${MOLECULE_DISTRO:-ubuntu2204}:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-"/lib/systemd/systemd"}
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     cgroupns_mode: host
+    tmpfs:
+      - /run
+      - /run/lock
+    environment:
+      container: docker
     privileged: true
     pre_build_image: true
+    
 provisioner:
   name: ansible
   config_options:
     defaults:
       gather_facts: true
+      remote_tmp: /tmp/.ansible
       roles_path: "../../../"
 ```
 

@@ -65,6 +65,10 @@ RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
 RUN rm -f /lib/systemd/system/systemd*udev* \
   && rm -f /lib/systemd/system/getty.target
 
+# Prepare writable remote tmp for Ansible
+RUN mkdir -p /var/tmp/.ansible && chmod 1777 /var/tmp /var/tmp/.ansible
+ENV ANSIBLE_REMOTE_TMP="/var/tmp/.ansible"
+  
 VOLUME ["/sys/fs/cgroup"]
 # Default CMD keeps container running for local testing
 # CI/CD systems will override this with their own commands
