@@ -97,7 +97,7 @@ provisioner:
   config_options:
     defaults:
       gather_facts: true
-      remote_tmp: /tmp/.ansible
+      remote_tmp: /var/tmp/.ansible 
       roles_path: "../../../"
 ```
 
