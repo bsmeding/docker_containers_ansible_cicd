@@ -81,10 +81,6 @@ RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
 # Prepare writable remote tmp for Ansible
 RUN mkdir -p /var/tmp/.ansible && chmod 1777 /var/tmp /var/tmp/.ansible
 ENV ANSIBLE_REMOTE_TMP="/var/tmp/.ansible"
-    
+
 VOLUME ["/sys/fs/cgroup"]
-STOPSIGNAL SIGRTMIN+3
-# Default CMD keeps container running for local testing
-# CI/CD systems will override this with their own commands
-# For Molecule testing, override with: docker run --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --tmpfs /run --tmpfs /run/lock bsmeding/ansible_cicd_rockylinux9:latest /lib/systemd/systemd
-CMD ["sleep", "infinity"]
+CMD ["/usr/lib/systemd/systemd"]

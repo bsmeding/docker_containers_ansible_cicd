@@ -69,8 +69,5 @@ RUN rm -f /lib/systemd/system/systemd*udev* \
 RUN mkdir -p /var/tmp/.ansible && chmod 1777 /var/tmp /var/tmp/.ansible
 ENV ANSIBLE_REMOTE_TMP="/var/tmp/.ansible"
   
-VOLUME ["/sys/fs/cgroup"]
-# Default CMD keeps container running for local testing
-# CI/CD systems will override this with their own commands
-# For Molecule testing, override with: docker run --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --tmpfs /run --tmpfs /run/lock bsmeding/ansible_cicd_ubuntu2204:latest /lib/systemd/systemd
-CMD ["sleep", "infinity"]
+VOLUME ["/sys/fs/cgroup", "/tmp", "/run"]
+CMD ["/lib/systemd/systemd"]
