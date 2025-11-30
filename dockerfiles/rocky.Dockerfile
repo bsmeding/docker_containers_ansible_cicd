@@ -34,16 +34,10 @@ RUN if [ "$PYTHON_VERSION" != "system" ]; then \
 # Install YAML dev lib (only exists in Rocky 8)
 RUN dnf install -y libyaml-devel || true
 
-# If running on Rocky 8, install Docker CE
-RUN if grep -q 'release 8' /etc/redhat-release; then \
-        echo "Rocky 8 detected: Installing Docker CE" && \
-        dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo && \
-        dnf makecache && \
-        dnf install -y docker-ce docker-ce-cli containerd.io && \
-        systemctl enable docker; \
-    else \
-        echo "Skipping Docker install on non-Rocky 8 base"; \
-    fi && \
+# Install Docker CE CLI from official Docker repository for consistency
+RUN dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo && \
+    dnf makecache && \
+    dnf install -y docker-ce-cli && \
     dnf clean all
 
 # Create and activate virtual environment
@@ -82,5 +76,5 @@ RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
 RUN mkdir -p /var/tmp/.ansible && chmod 1777 /var/tmp /var/tmp/.ansible
 ENV ANSIBLE_REMOTE_TMP="/var/tmp/.ansible"
 
-VOLUME ["/sys/fs/cgroup"]
+VOLUME ["/sys/fs/cgroup", "/tmp", "/run"]
 CMD ["/usr/lib/systemd/systemd"]

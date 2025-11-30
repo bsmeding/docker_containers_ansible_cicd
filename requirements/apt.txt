@@ -1,6 +1,7 @@
 sudo
 bash
 curl
+gnupg
 systemd
 systemd-cron
 systemd-sysv

@@ -18,7 +18,8 @@ RUN apk add --no-cache \
     musl-dev \
     libffi-dev \
     cargo \
-    make
+    make \
+    docker
 
 # Install Python - try requested version, fallback to system python3
 RUN if [ "$PYTHON_VERSION" != "system" ]; then \
