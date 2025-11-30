@@ -74,9 +74,10 @@ RUN ln -sf /opt/venv/bin/python3 /usr/local/bin/python3-ansible && \
 RUN rm -f /lib/systemd/system/systemd*udev* \
   && rm -f /lib/systemd/system/getty.target
 
-# Prepare writable remote tmp for Ansible
+# Prepare writable remote tmp for Ansible (correct env variables)
 RUN mkdir -p /var/tmp/.ansible && chmod 1777 /var/tmp /var/tmp/.ansible
 ENV ANSIBLE_REMOTE_TMP="/var/tmp/.ansible"
+ENV ANSIBLE_REMOTE_TEMP="/var/tmp/.ansible"
   
 VOLUME ["/sys/fs/cgroup", "/tmp", "/run"]
 CMD ["/lib/systemd/systemd"]
