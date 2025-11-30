@@ -23,7 +23,6 @@ jobs:
             {"tag":"debian","python_version":"3.13"},
             {"tag":"rockylinux8","python_version":"system"},
             {"tag":"rockylinux9","python_version":"system"},
-            {"tag":"rockylinux10","python_version":"3.13"},
             {"tag":"rockylinux","python_version":"3.13"},
             {"tag":"alpine3.20","python_version":"system"},
             {"tag":"alpine3.21","python_version":"system"},
