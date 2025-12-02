@@ -15,6 +15,7 @@ jobs:
         id: set-matrix
         run: |
           matrix_json='[
+            {"tag":"ubuntu2204","python_version":"system"},
             {"tag":"ubuntu2404","python_version":"system"},
             {"tag":"ubuntu","python_version":"system"},
             {"tag":"debian11","python_version":"system"},
