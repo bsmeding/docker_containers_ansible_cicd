@@ -42,7 +42,7 @@ jobs:
         include: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -73,7 +73,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Update Docker Hub README for ${{ matrix.tag }}
         uses: peter-evans/dockerhub-description@v5
