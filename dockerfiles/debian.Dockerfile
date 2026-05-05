@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=debian:trixie
+ARG BASE_IMAGE=debian:trixie-20260421
 ARG PYTHON_VERSION=system
 FROM ${BASE_IMAGE}
 
