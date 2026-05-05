@@ -8,12 +8,25 @@ Each image is built for a specific OS to match production environments or CI run
 
 - `ubuntu2004` → Ubuntu 20.04
 - `ubuntu2204` → Ubuntu 22.04
+- `ubuntu2404` → Ubuntu 24.04
+- `ubuntu2604` → Ubuntu 26.04
 - `debian11` → Debian Bullseye
 - `debian12` → Debian Bookworm
+- `debian13` → Debian Trixie
 - `rockylinux8` → Rocky Linux 8
 - `rockylinux9` → Rocky Linux 9
+- `rockylinux10` → Rocky Linux 10
 - `alpine3.20` → Alpine 3.20
 - `alpine3.21` → Alpine 3.21
+- `alpine3.22` → Alpine 3.22
+- `alpine3.23` → Alpine 3.23
+
+Default tags point to the newest supported version for each distro family:
+
+- `ubuntu` → Ubuntu 26.04
+- `debian` → Debian Trixie
+- `rockylinux` → Rocky Linux 10
+- `alpine3` → Alpine 3.23
 
 Each image is tagged as:
 ```
