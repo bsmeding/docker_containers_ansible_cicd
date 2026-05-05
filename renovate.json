@@ -2,6 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "packageRules": [
     {
+      "description": "Do not update distro base images; this repo intentionally supports fixed OS versions",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ubuntu", "debian", "rockylinux", "rockylinux/rockylinux", "alpine"],
+      "enabled": false
+    },
+    {
       "description": "Automerge non-major updates",
       "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^0/",

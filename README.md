@@ -6,26 +6,22 @@ This repository provides prebuilt Docker images for **Ansible-based CI/CD pipeli
 
 Each image is built for a specific OS to match production environments or CI runner needs:
 
-- `ubuntu2004` → Ubuntu 20.04
-- `ubuntu2204` → Ubuntu 22.04
 - `ubuntu2404` → Ubuntu 24.04
 - `ubuntu2604` → Ubuntu 26.04
-- `debian11` → Debian Bullseye
 - `debian12` → Debian Bookworm
 - `debian13` → Debian Trixie
 - `rockylinux8` → Rocky Linux 8
 - `rockylinux9` → Rocky Linux 9
-- `rockylinux10` → Rocky Linux 10
-- `alpine3.20` → Alpine 3.20
-- `alpine3.21` → Alpine 3.21
 - `alpine3.22` → Alpine 3.22
 - `alpine3.23` → Alpine 3.23
+
+Only the latest two versions per distro family are actively built and maintained. Older Docker Hub images remain available but are no longer updated.
 
 Default tags point to the newest supported version for each distro family:
 
 - `ubuntu` → Ubuntu 26.04
 - `debian` → Debian Trixie
-- `rockylinux` → Rocky Linux 10
+- `rockylinux` → Rocky Linux 9
 - `alpine3` → Alpine 3.23
 
 Each image is tagged as:
@@ -68,7 +64,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: bsmeding/ansible_cicd_ubuntu2204:latest
+      image: bsmeding/ansible_cicd_ubuntu2404:latest
     steps:
       - uses: actions/checkout@v4
       - run: ansible-playbook playbook.yml
@@ -92,7 +88,7 @@ driver:
   name: docker
 platforms:
   - name: instance
-    image: "bsmeding/ansible_cicd_${MOLECULE_DISTRO:-ubuntu2204}:latest"
+    image: "bsmeding/ansible_cicd_${MOLECULE_DISTRO:-ubuntu2404}:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-"/lib/systemd/systemd"}
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
@@ -126,8 +122,8 @@ provisioner:
 Use environment variables to test different distributions:
 
 ```bash
-# Test on Ubuntu 22.04
-MOLECULE_DISTRO=ubuntu2204 molecule test
+# Test on Ubuntu 24.04
+MOLECULE_DISTRO=ubuntu2404 molecule test
 
 # Test on Debian 12
 MOLECULE_DISTRO=debian12 molecule test
@@ -143,7 +139,7 @@ For roles that need Docker (e.g., deploying containers), add Docker socket acces
 ```yaml
 platforms:
   - name: instance
-    image: bsmeding/ansible_cicd_${MOLECULE_DISTRO:-ubuntu2204}:latest
+    image: bsmeding/ansible_cicd_${MOLECULE_DISTRO:-ubuntu2404}:latest
     command: /lib/systemd/systemd
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
@@ -172,7 +168,7 @@ The images are pre-configured with the correct Python interpreter path (`/opt/ve
 
 All images are pushed to [Docker Hub](https://hub.docker.com/u/bsmeding):
 
-📦 [bsmeding/ansible_cicd_ubuntu2204](https://hub.docker.com/r/bsmeding/ansible_cicd_ubuntu2204)  
+📦 [bsmeding/ansible_cicd_ubuntu2404](https://hub.docker.com/r/bsmeding/ansible_cicd_ubuntu2404)  
 📦 [bsmeding/ansible_cicd_debian13](https://hub.docker.com/r/bsmeding/ansible_cicd_debian13)  
 ... and more!
 
